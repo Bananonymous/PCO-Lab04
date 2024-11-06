@@ -7,6 +7,8 @@
 #ifndef LOCOMOTIVEBEHAVIOR_H
 #define LOCOMOTIVEBEHAVIOR_H
 
+#include <pcosynchro/pcosemaphore.h>
+
 #include "locomotive.h"
 #include "launchable.h"
 #include "sharedsectioninterface.h"
@@ -21,7 +23,7 @@ public:
      * \brief locomotiveBehavior Constructeur de la classe
      * \param loco la locomotive dont on représente le comportement
      */
-    LocomotiveBehavior(Locomotive& loco, std::shared_ptr<SharedSectionInterface> sharedSection /*, autres paramètres éventuels */) : loco(loco), sharedSection(sharedSection) {
+    LocomotiveBehavior(Locomotive& loco, std::shared_ptr<SharedSectionInterface> sharedSection /*, autres paramètres éventuels */) : loco(loco), sharedSection(sharedSection), stationWait_semaphore(0) {
         // Eventuel code supplémentaire du constructeur
     }
 
@@ -41,6 +43,8 @@ protected:
      */
     void printCompletionMessage() override;
 
+    void waitingAtStation(int &waitingLocos);
+
     /**
      * @brief loco La locomotive dont on représente le comportement
      */
@@ -51,6 +55,8 @@ protected:
      */
     std::shared_ptr<SharedSectionInterface> sharedSection;
 
+
+    PcoSemaphore stationWait_semaphore;
     /*
      * Vous êtes libres d'ajouter des méthodes ou attributs
      *

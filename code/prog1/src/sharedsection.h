@@ -29,6 +29,8 @@ public:
      */
     SharedSection() {
         // TODO
+        section_semaphore.release();
+        isUsed = false;
     }
 
     /**
@@ -41,7 +43,11 @@ public:
      */
     void access(Locomotive &loco) override {
         // TODO
-
+        if(isUsed)
+            loco.arreter();
+        section_semaphore.acquire();
+        loco.demarrer();
+        isUsed = true;
         // Exemple de message dans la console globale
         afficher_message(qPrintable(QString("The engine no. %1 accesses the shared section.").arg(loco.numero())));
     }
@@ -54,6 +60,8 @@ public:
     void leave(Locomotive& loco) override {
         // TODO
 
+        isUsed = false;
+        section_semaphore.release();
         // Exemple de message dans la console globale
         afficher_message(qPrintable(QString("The engine no. %1 leaves the shared section.").arg(loco.numero())));
     }
@@ -61,6 +69,9 @@ public:
 private:
 
     /* A vous d'ajouter ce qu'il vous faut */
+
+    bool isUsed = false;
+    PcoSemaphore section_semaphore;
 
     // Méthodes privées ...
     // Attribut privés ...
