@@ -6,6 +6,7 @@
 
 #include "locomotivebehavior.h"
 #include "ctrain_handler.h"
+#include "sharedstation.h"
 
 void LocomotiveBehavior::run()
 {
@@ -15,10 +16,9 @@ void LocomotiveBehavior::run()
     loco.afficherMessage("Ready!");
 
     int nbToursLoco7 = 0, nbToursLoco42 = 0; // Track number of completed loops
-    static int waitingLocos = 0; // Track number of locos waiting in the station
     bool directionAvant = true; // Track direction (true = forward, false = backward)
     const int N1 = 1; // Define N1 loops before reversing direction (customize for each locomotive)
-    const int N2 = 2;
+    const int N2 = 4;
 
     /* A vous de jouer ! */
 
@@ -50,7 +50,7 @@ void LocomotiveBehavior::run()
             if (nbToursLoco42 >= N1) {
                 directionAvant = !directionAvant; // Toggle the direction flag
                 nbToursLoco42 = 0; // Reset the loop counter
-                waitingAtStation(waitingLocos);
+                sharedStation.waitingAtStation(loco);
             }
         }
         else if (loco.numero() == 7) {
@@ -84,7 +84,7 @@ void LocomotiveBehavior::run()
             if (nbToursLoco7 >= N2) {
                 directionAvant = !directionAvant; // Toggle the direction flag
                 nbToursLoco7 = 0; // Reset the loop counter
-                waitingAtStation(waitingLocos);
+                sharedStation.waitingAtStation(loco);
             }
         }
     }
@@ -102,21 +102,3 @@ void LocomotiveBehavior::printCompletionMessage()
     loco.afficherMessage("J'ai terminé");
 }
 
-void LocomotiveBehavior::waitingAtStation(int &waitingLocos)
-{
-    loco.inverserSens(); // Reverse the direction of the locomotive
-    loco.afficherMessage("Loco 42: Direction inversée, attente en gare");
-    loco.arreter();
-    ++waitingLocos;
-    if(waitingLocos != 1) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-        stationWait_semaphore.release();
-        waitingLocos = 0;
-        loco.demarrer();
-    }
-    else {
-        loco.afficherMessage("J'attends en gare...");
-        stationWait_semaphore.acquire();
-        loco.demarrer();
-    }
-}

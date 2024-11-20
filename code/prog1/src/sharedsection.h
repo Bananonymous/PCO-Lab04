@@ -10,6 +10,7 @@
 #include <QDebug>
 
 #include <pcosynchro/pcosemaphore.h>
+#include <pcosynchro/pcomutex.h>
 
 #include "locomotive.h"
 #include "ctrain_handler.h"
@@ -43,11 +44,15 @@ public:
      */
     void access(Locomotive &loco) override {
         // TODO
-        if(isUsed)
+        section_mutex.lock();
+        if(isUsed) {
             loco.arreter();
+            section_mutex.unlock();
+        }
         section_semaphore.acquire();
         loco.demarrer();
         isUsed = true;
+        section_mutex.unlock();
         // Exemple de message dans la console globale
         afficher_message(qPrintable(QString("The engine no. %1 accesses the shared section.").arg(loco.numero())));
     }
@@ -59,9 +64,10 @@ public:
      */
     void leave(Locomotive& loco) override {
         // TODO
-
+        section_mutex.lock();
         isUsed = false;
         section_semaphore.release();
+        section_mutex.unlock();
         // Exemple de message dans la console globale
         afficher_message(qPrintable(QString("The engine no. %1 leaves the shared section.").arg(loco.numero())));
     }
@@ -72,6 +78,7 @@ private:
 
     bool isUsed = false;
     PcoSemaphore section_semaphore;
+    PcoMutex section_mutex;
 
     // Méthodes privées ...
     // Attribut privés ...

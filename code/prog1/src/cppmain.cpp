@@ -10,15 +10,15 @@
 #include "locomotivebehavior.h"
 #include "sharedsectioninterface.h"
 #include "sharedsection.h"
+#include "sharedstation.h"
 
 // Locomotives :
 // Vous pouvez changer les vitesses initiales, ou utiliser la fonction loco.fixerVitesse(vitesse);
 // Laissez les numéros des locos à 0 et 1 pour ce laboratoire
-
 // Locomotive A
-static Locomotive locoA(7 /* Numéro (pour commande trains sur maquette réelle) */, 15 /* Vitesse */);
+static Locomotive locoA(7 /* Numéro (pour commande trains sur maquette réelle) */, 35 /* Vitesse */);
 // Locomotive B
-static Locomotive locoB(42 /* Numéro (pour commande trains sur maquette réelle) */, 12 /* Vitesse */);
+static Locomotive locoB(42 /* Numéro (pour commande trains sur maquette réelle) */, 15 /* Vitesse */);
 
 //Arret d'urgence
 void emergency_stop()
@@ -99,10 +99,13 @@ int cmain()
     // Création de la section partagée
     std::shared_ptr<SharedSectionInterface> sharedSection = std::make_shared<SharedSection>();
 
+    std::shared_ptr<SharedStation> sharedStation = std::make_shared<SharedStation>(2);
+
+
     // Création du thread pour la loco 0
-    std::unique_ptr<Launchable> locoBehaveA = std::make_unique<LocomotiveBehavior>(locoA, sharedSection /*, autres paramètres ...*/);
+    std::unique_ptr<Launchable> locoBehaveA = std::make_unique<LocomotiveBehavior>(locoA, sharedSection, sharedStation /*, autres paramètres ...*/);
     // Création du thread pour la loco 1
-    std::unique_ptr<Launchable> locoBehaveB = std::make_unique<LocomotiveBehavior>(locoB, sharedSection /*, autres paramètres ...*/);
+    std::unique_ptr<Launchable> locoBehaveB = std::make_unique<LocomotiveBehavior>(locoB, sharedSection, sharedStation /*, autres paramètres ...*/);
 
     // Lanchement des threads
     afficher_message(qPrintable(QString("Lancement thread loco A (numéro %1)").arg(locoA.numero())));

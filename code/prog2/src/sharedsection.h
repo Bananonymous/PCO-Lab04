@@ -30,6 +30,9 @@ public:
      */
     SharedSection() {
         // TODO
+        section_semaphore.release();
+        section_mutex.release();
+        isUsed = false;
     }
 
     /**
@@ -40,10 +43,10 @@ public:
      * @param entryPoint Le point d'entree de la locomotive qui fait l'appel
      */
     void request(Locomotive& loco, int priority) override {
-        // TODO
-
-        // Exemple de message dans la console globale
-        afficher_message(qPrintable(QString("The engine no. %1 requested the shared section.").arg(loco.numero())));
+        section_mutex.acquire();
+        waitingLocos.push_back(&loco); // Ajouter la locomotive à la liste d'attente
+        loco.afficherMessage("Requête déposée avec priorité " + QString::number(priority));
+        section_mutex.release();
     }
 
     /**
@@ -55,11 +58,27 @@ public:
      * @param loco La locomotive qui essaie accéder à la section partagée
      * @param locoId L'identidiant de la locomotive qui fait l'appel
      */
-    void access(Locomotive &loco, int priority) override {
-        // TODO
+    void access(Locomotive& loco, int priority) override {
+        while (true) {
+            section_mutex.acquire();
 
-        // Exemple de message dans la console globale
-        afficher_message(qPrintable(QString("The engine no. %1 accesses the shared section.").arg(loco.numero())));
+            // Vérifier si la locomotive courante a la plus haute priorité
+            Locomotive* highestPriorityLoco = getHighestPriorityLoco();
+            if (highestPriorityLoco == &loco && !isUsed) {
+                // La locomotive courante a la priorité et le tronçon est libre
+                isUsed = true;
+                waitingLocos.erase(
+                    std::remove(waitingLocos.begin(), waitingLocos.end(), &loco),
+                    waitingLocos.end()
+                );
+                section_mutex.release();
+                loco.afficherMessage("Accès accordé avec priorité " + QString::number(priority));
+                section_semaphore.acquire(); // Acquérir le tronçon
+                break;
+            }
+
+            section_mutex.release();
+        }
     }
 
     /**
@@ -69,22 +88,45 @@ public:
      * @param locoId L'identidiant de la locomotive qui fait l'appel
      */
     void leave(Locomotive& loco) override {
-        // TODO
-
-        // Exemple de message dans la console globale
-        afficher_message(qPrintable(QString("The engine no. %1 leaves the shared section.").arg(loco.numero())));
+        section_mutex.acquire();
+        isUsed = false; // Libérer le tronçon
+        section_semaphore.release(); // Libérer l'accès
+        loco.afficherMessage("Tronçon libéré par loco " + QString::number(loco.numero()));
+        section_mutex.release();
     }
 
     void togglePriorityMode() {
-        /* TODO */
+        priorityMode = (priorityMode == PriorityMode::HIGH_PRIORITY)
+                           ? PriorityMode::LOW_PRIORITY
+                           : PriorityMode::HIGH_PRIORITY;
     }
+
+
 
 private:
 
     /* A vous d'ajouter ce qu'il vous faut */
+    struct ComparePriority {
+        bool operator()(const Locomotive* l1, const Locomotive* l2) {
+            return l1->priority < l2->priority; // Priorité décroissante
+        }
+    };
+
+    Locomotive* getHighestPriorityLoco() {
+        if (waitingLocos.empty()) return nullptr;
+        return *std::max_element(waitingLocos.begin(), waitingLocos.end(),
+                                 [this](Locomotive* l1, Locomotive* l2) {
+                                     return l1->priority < l2->priority;
+                                 });
+    }
 
     // Méthodes privées ...
     // Attributes privés ...
+    bool isUsed = false;
+    PcoSemaphore section_semaphore;
+    PcoSemaphore section_mutex;
+    std::vector<Locomotive*> waitingLocos;
+    PriorityMode priorityMode = PriorityMode::HIGH_PRIORITY;
 };
 
 

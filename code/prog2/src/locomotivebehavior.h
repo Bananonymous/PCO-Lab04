@@ -10,6 +10,7 @@
 #include "locomotive.h"
 #include "launchable.h"
 #include "sharedsectioninterface.h"
+#include "sharedstation.h"
 
 /**
  * @brief La classe LocomotiveBehavior représente le comportement d'une locomotive
@@ -21,8 +22,15 @@ public:
      * \brief locomotiveBehavior Constructeur de la classe
      * \param loco la locomotive dont on représente le comportement
      */
-    LocomotiveBehavior(Locomotive& loco, std::shared_ptr<SharedSectionInterface> sharedSection /*, autres paramètres éventuels */) : loco(loco), sharedSection(sharedSection) {
+    LocomotiveBehavior(Locomotive& loco, std::shared_ptr<SharedSectionInterface> sharedSection, std::shared_ptr<SharedStation> sharedStation/*, autres paramètres éventuels */):
+    loco(loco),sharedSection(sharedSection), sharedStation(*sharedStation){
         // Eventuel code supplémentaire du constructeur
+        setRandomPriority();
+    }
+
+    // Génération aléatoire d'une nouvelle priorité entre 0 et 10
+    void setRandomPriority() {
+        this->loco.priority = rand() % 11; // Génère un nombre entre 0 et 10
     }
 
 protected:
@@ -56,6 +64,11 @@ protected:
      *
      * Par exemple la priorité ou le parcours
      */
+
+private:
+
+    SharedStation& sharedStation;
+
 };
 
 #endif // LOCOMOTIVEBEHAVIOR_H
