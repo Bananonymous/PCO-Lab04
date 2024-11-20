@@ -20,10 +20,8 @@
  * @brief La classe SharedSection implémente l'interface SharedSectionInterface qui
  * propose les méthodes liées à la section partagée.
  */
-class SharedSection final : public SharedSectionInterface
-{
+class SharedSection final : public SharedSectionInterface {
 public:
-
     /**
      * @brief SharedSection Constructeur de la classe qui représente la section partagée.
      * Initialisez vos éventuels attributs ici, sémaphores etc.
@@ -42,7 +40,7 @@ public:
      * @param locoId L'identidiant de la locomotive qui fait l'appel
      * @param entryPoint Le point d'entree de la locomotive qui fait l'appel
      */
-    void request(Locomotive& loco, int priority) override {
+    void request(Locomotive &loco, int priority) override {
         section_mutex.acquire();
         waitingLocos.push_back(&loco); // Ajouter la locomotive à la liste d'attente
         loco.afficherMessage("Requête déposée avec priorité " + QString::number(priority));
@@ -58,14 +56,15 @@ public:
      * @param loco La locomotive qui essaie accéder à la section partagée
      * @param locoId L'identidiant de la locomotive qui fait l'appel
      */
-    void access(Locomotive& loco, int priority) override {
+    void access(Locomotive &loco, int priority) override {
         while (true) {
             section_mutex.acquire();
 
             // Vérifier si la locomotive courante a la plus haute priorité
-            Locomotive* highestPriorityLoco = getHighestPriorityLoco();
+            Locomotive *highestPriorityLoco = getHighestPriorityLoco();
             if (highestPriorityLoco == &loco && !isUsed) {
                 // La locomotive courante a la priorité et le tronçon est libre
+                loco.demarrer();
                 isUsed = true;
                 waitingLocos.erase(
                     std::remove(waitingLocos.begin(), waitingLocos.end(), &loco),
@@ -75,6 +74,8 @@ public:
                 loco.afficherMessage("Accès accordé avec priorité " + QString::number(priority));
                 section_semaphore.acquire(); // Acquérir le tronçon
                 break;
+            } else {
+                loco.arreter();
             }
 
             section_mutex.release();
@@ -87,7 +88,7 @@ public:
      * @param loco La locomotive qui quitte la section partagée
      * @param locoId L'identidiant de la locomotive qui fait l'appel
      */
-    void leave(Locomotive& loco) override {
+    void leave(Locomotive &loco) override {
         section_mutex.acquire();
         isUsed = false; // Libérer le tronçon
         section_semaphore.release(); // Libérer l'accès
@@ -95,27 +96,31 @@ public:
         section_mutex.release();
     }
 
-    void togglePriorityMode() {
+    void togglePriorityMode() override {
         priorityMode = (priorityMode == PriorityMode::HIGH_PRIORITY)
                            ? PriorityMode::LOW_PRIORITY
                            : PriorityMode::HIGH_PRIORITY;
     }
 
-
-
 private:
-
     /* A vous d'ajouter ce qu'il vous faut */
     struct ComparePriority {
-        bool operator()(const Locomotive* l1, const Locomotive* l2) {
+        bool operator()(const Locomotive *l1, const Locomotive *l2) {
             return l1->priority < l2->priority; // Priorité décroissante
         }
     };
 
-    Locomotive* getHighestPriorityLoco() {
+    Locomotive *getHighestPriorityLoco() {
         if (waitingLocos.empty()) return nullptr;
-        return *std::max_element(waitingLocos.begin(), waitingLocos.end(),
-                                 [this](Locomotive* l1, Locomotive* l2) {
+        if (priorityMode == PriorityMode::HIGH_PRIORITY) {
+            return *std::max_element(waitingLocos.begin(), waitingLocos.end(),
+                                     [this](Locomotive *l1, Locomotive *l2) {
+                                         return l1->priority < l2->priority;
+                                     });
+        }
+
+        return *std::min_element(waitingLocos.begin(), waitingLocos.end(),
+                                 [this](Locomotive *l1, Locomotive *l2) {
                                      return l1->priority < l2->priority;
                                  });
     }
@@ -125,7 +130,7 @@ private:
     bool isUsed = false;
     PcoSemaphore section_semaphore;
     PcoSemaphore section_mutex;
-    std::vector<Locomotive*> waitingLocos;
+    std::vector<Locomotive *> waitingLocos;
     PriorityMode priorityMode = PriorityMode::HIGH_PRIORITY;
 };
 

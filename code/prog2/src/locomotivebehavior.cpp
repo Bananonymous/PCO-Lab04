@@ -18,7 +18,7 @@ void LocomotiveBehavior::run()
     int nbToursLoco7 = 0, nbToursLoco42 = 0; // Track number of completed loops
     bool directionAvant = true; // Track direction (true = forward, false = backward)
     const int N1 = 1; // Define N1 loops before reversing direction (customize for each locomotive)
-    const int N2 = 4;
+    const int N2 = 1;
 
     /* A vous de jouer ! */
 
@@ -28,7 +28,7 @@ void LocomotiveBehavior::run()
         if (loco.numero() == 42) {
             if (directionAvant) {
                 // Logic for moving forward
-                attendre_contact(28);
+                attendre_contact(29);
                 sharedSection->request(loco, loco.priority);
                 attendre_contact(22);
                 sharedSection->access(loco, loco.priority);
@@ -38,7 +38,7 @@ void LocomotiveBehavior::run()
 
             } else {
                 // Logic for moving in reverse direction
-                attendre_contact(10);
+                attendre_contact(3);
                 sharedSection->request(loco, loco.priority);
                 attendre_contact(11);
                 sharedSection->access(loco, loco.priority);
@@ -55,12 +55,13 @@ void LocomotiveBehavior::run()
                 directionAvant = !directionAvant; // Toggle the direction flag
                 nbToursLoco42 = 0; // Reset the loop counter
                 sharedStation.waitingAtStation(loco);
+                sharedSection->togglePriorityMode();
             }
         }
         else if (loco.numero() == 7) {
             if (directionAvant) {
                 // Logic for moving forward
-                attendre_contact(32);
+                attendre_contact(33);
                 sharedSection->request(loco,loco.priority);
 
                 attendre_contact(25);
@@ -75,7 +76,7 @@ void LocomotiveBehavior::run()
 
             } else {
                 // Logic for moving in reverse direction
-                attendre_contact(7);
+                attendre_contact(6);
                 sharedSection->request(loco, loco.priority);
                 attendre_contact(14);
                 sharedSection->access(loco, loco.priority);

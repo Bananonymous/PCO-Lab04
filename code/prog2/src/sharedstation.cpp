@@ -37,6 +37,7 @@ void SharedStation::waitingAtStation(Locomotive& loco)
         waiting_at_station_semaphore.acquire(); // Attente de libération par la seconde locomotive
     }
 
+    loco.priority = rand() %11;
     loco.demarrer();
     loco.afficherMessage("Je repars !");
 }
