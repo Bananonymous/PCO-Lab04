@@ -11,11 +11,19 @@
 
 #include "sharedstation.h"
 
+/** Constructeur de la classe SharedStation
+ * @param nbTrains Le nombre de locomotives qui circulent sur la maquette
+ */
 SharedStation::SharedStation(int nbTrains): totLocos(nbTrains), waiting_at_station_semaphore(0), goingToStation(1) {
     waitingLocos = false;
 }
 
 
+/**
+ * @brief waitingAtStation Méthode à appeler par une locomotive pour attendre en gare
+ * avec gestion de l'attente passive de la seconde locomotive.
+ * @param loco La locomotive qui attend en gare
+ */
 void SharedStation::waitingAtStation(Locomotive& loco)
 {
     loco.arreter();

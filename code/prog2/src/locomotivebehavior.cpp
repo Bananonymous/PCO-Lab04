@@ -22,6 +22,7 @@ void LocomotiveBehavior::run()
     constexpr int nbToursAFaire42 = 1, nbToursAFaire7 = 1;
 
     while(!PcoThread::thisThread()->stopRequested()) {
+        // Logiques implémentées selon chaque locomotive
         if (loco.numero() == 42) {
             if (directionAvant) {
                 // Logique pour aller en avant
@@ -57,6 +58,7 @@ void LocomotiveBehavior::run()
                 sharedSection->togglePriorityMode(); // Inversion de la priorité après l'attente en gare
             }
         }
+        // Logiques implémentées selon chaque locomotive
         else if (loco.numero() == 7) {
             if (directionAvant) {
                 // Logique pour aller en avant

@@ -94,6 +94,10 @@ public:
         section_mutex.release();
     }
 
+
+    /**
+     * @brief togglePriorityMode Méthode à appeler pour changer le mode de priorité (HIGH_PRIORITY ou LOW_PRIORITY)
+     */
     void togglePriorityMode() override {
         priorityMode = (priorityMode == PriorityMode::HIGH_PRIORITY)
                            ? PriorityMode::LOW_PRIORITY
@@ -101,6 +105,12 @@ public:
     }
 
 private:
+    /**
+     * @brief getHighestPriorityLoco Méthode qui retourne la locomotive avec la priorité la plus
+     * élevée ou la plus basse selon le mode de priorité ou la première locomotive si elles ont
+     * la même priorité.
+     * @return la locomotive en question
+     */
     Locomotive *getHighestPriorityLoco() {
         if (waitingLocos.empty()) return nullptr;
 

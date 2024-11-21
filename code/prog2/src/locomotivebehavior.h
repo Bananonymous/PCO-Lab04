@@ -26,7 +26,6 @@ public:
      */
     LocomotiveBehavior(Locomotive& loco, std::shared_ptr<SharedSectionInterface> sharedSection, std::shared_ptr<SharedStation> sharedStation):
     loco(loco),sharedSection(sharedSection), sharedStation(*sharedStation){
-        // Eventuel code supplémentaire du constructeur
         setRandomPriority();
     }
 
@@ -67,7 +66,7 @@ protected:
     std::shared_ptr<SharedSectionInterface> sharedSection;
 
     /**
-     * @brief sharedStation référence la station "partagée"
+     * @brief sharedStation référence la station "partagée" (Utilisation de référence pour différencier avec sharedSection qui est textuellement proche)
      */
     SharedStation& sharedStation;
 
