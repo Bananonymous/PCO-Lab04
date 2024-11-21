@@ -1,10 +1,3 @@
-//    ___  _________    ___  ___  ___ ____ //
-//   / _ \/ ___/ __ \  |_  |/ _ \|_  / / / //
-//  / ___/ /__/ /_/ / / __// // / __/_  _/ //
-// /_/   \___/\____/ /____/\___/____//_/   //
-//                                         //
-
-
 #ifndef SHAREDSECTION_H
 #define SHAREDSECTION_H
 
@@ -26,10 +19,7 @@ public:
      * @brief SharedSection Constructeur de la classe qui représente la section partagée.
      * Initialisez vos éventuels attributs ici, sémaphores etc.
      */
-    SharedSection() {
-        // TODO
-        section_semaphore.release();
-        section_mutex.release();
+    SharedSection() : section_mutex(1), section_waiting_locos(0) {
         isUsed = false;
     }
 
@@ -37,8 +27,7 @@ public:
      * @brief request Méthode a appeler pour indiquer que la locomotive désire accéder à la
      * section partagée (deux contacts avant la section partagée).
      * @param loco La locomotive qui désire accéder
-     * @param locoId L'identidiant de la locomotive qui fait l'appel
-     * @param entryPoint Le point d'entree de la locomotive qui fait l'appel
+     * @param priority La priorité de la locomotive qui fait l'appel
      */
     void request(Locomotive &loco, int priority) override {
         section_mutex.acquire();
@@ -54,30 +43,34 @@ public:
      * attente, le thread doit être reveillé lorsque la section partagée est à nouveau libre et
      * la locomotive redémarée. (méthode à appeler un contact avant la section partagée).
      * @param loco La locomotive qui essaie accéder à la section partagée
-     * @param locoId L'identidiant de la locomotive qui fait l'appel
+     * @param priority La priorité de la locomotive qui fait l'appel
      */
     void access(Locomotive &loco, int priority) override {
-        while (true) {
+        section_mutex.acquire();
+
+        // Vérifier si la locomotive courante a la plus haute priorité
+        Locomotive *highestPriorityLoco = getHighestPriorityLoco();
+        if (highestPriorityLoco == &loco && !isUsed) {
+            // La locomotive courante a la priorité et le tronçon est libre
+            isUsed = true;
+            waitingLocos.erase(
+                std::remove(waitingLocos.begin(), waitingLocos.end(), &loco),
+                waitingLocos.end()
+            );
+            loco.afficherMessage("Accès accordé avec priorité " + QString::number(priority));
+            section_mutex.release();
+        } else {
+            loco.afficherMessage("Attente, section occupée");
+            loco.arreter();
+            section_mutex.release(); // Release mutex before blocking
+            section_waiting_locos.acquire(); // Attendre l'accès
             section_mutex.acquire();
-
-            // Vérifier si la locomotive courante a la plus haute priorité
-            Locomotive *highestPriorityLoco = getHighestPriorityLoco();
-            if (highestPriorityLoco == &loco && !isUsed) {
-                // La locomotive courante a la priorité et le tronçon est libre
-                loco.demarrer();
-                isUsed = true;
-                waitingLocos.erase(
-                    std::remove(waitingLocos.begin(), waitingLocos.end(), &loco),
-                    waitingLocos.end()
-                );
-                section_mutex.release();
-                loco.afficherMessage("Accès accordé avec priorité " + QString::number(priority));
-                section_semaphore.acquire(); // Acquérir le tronçon
-                break;
-            } else {
-                loco.arreter();
-            }
-
+            waitingLocos.erase(
+                std::remove(waitingLocos.begin(), waitingLocos.end(), &loco),
+                waitingLocos.end()
+            );
+            loco.afficherMessage("Accès accordé avec priorité " + QString::number(priority));
+            loco.demarrer();
             section_mutex.release();
         }
     }
@@ -86,13 +79,16 @@ public:
      * @brief leave Méthode à appeler pour indiquer que la locomotive est sortie de la section
      * partagée. (reveille les threads des locomotives potentiellement en attente).
      * @param loco La locomotive qui quitte la section partagée
-     * @param locoId L'identidiant de la locomotive qui fait l'appel
      */
     void leave(Locomotive &loco) override {
         section_mutex.acquire();
         isUsed = false; // Libérer le tronçon
-        section_semaphore.release(); // Libérer l'accès
         loco.afficherMessage("Tronçon libéré par loco " + QString::number(loco.numero()));
+
+        if (!waitingLocos.empty()) {
+            section_waiting_locos.release(); // Libérer l'accès seulement si des locomotives attendent
+        }
+
         section_mutex.release();
     }
 
@@ -103,36 +99,41 @@ public:
     }
 
 private:
-    /* A vous d'ajouter ce qu'il vous faut */
-    struct ComparePriority {
-        bool operator()(const Locomotive *l1, const Locomotive *l2) {
-            return l1->priority < l2->priority; // Priorité décroissante
-        }
-    };
-
     Locomotive *getHighestPriorityLoco() {
         if (waitingLocos.empty()) return nullptr;
-        if (priorityMode == PriorityMode::HIGH_PRIORITY) {
-            return *std::max_element(waitingLocos.begin(), waitingLocos.end(),
-                                     [this](Locomotive *l1, Locomotive *l2) {
-                                         return l1->priority < l2->priority;
-                                     });
+
+        Locomotive *selectedLoco = nullptr;
+
+        for (auto loco : waitingLocos) {
+            if (selectedLoco == nullptr) {
+                selectedLoco = loco;
+            } else {
+                if (priorityMode == PriorityMode::HIGH_PRIORITY) {
+                    // En mode HIGH_PRIORITY, on choisit la locomotive avec la priorité la plus élevée
+                    if (loco->priority > selectedLoco->priority ||
+                        (loco->priority == selectedLoco->priority && loco == waitingLocos.front())) {
+                        selectedLoco = loco;
+                        }
+                } else if (priorityMode == PriorityMode::LOW_PRIORITY) {
+                    // En mode LOW_PRIORITY, on choisit la locomotive avec la priorité la plus basse
+                    if (loco->priority < selectedLoco->priority ||
+                        (loco->priority == selectedLoco->priority && loco == waitingLocos.front())) {
+                        selectedLoco = loco;
+                        }
+                }
+            }
         }
 
-        return *std::min_element(waitingLocos.begin(), waitingLocos.end(),
-                                 [this](Locomotive *l1, Locomotive *l2) {
-                                     return l1->priority < l2->priority;
-                                 });
+        return selectedLoco;
     }
 
-    // Méthodes privées ...
+
     // Attributes privés ...
     bool isUsed = false;
-    PcoSemaphore section_semaphore;
+    PcoSemaphore section_waiting_locos;
     PcoSemaphore section_mutex;
     std::vector<Locomotive *> waitingLocos;
     PriorityMode priorityMode = PriorityMode::HIGH_PRIORITY;
 };
-
 
 #endif // SHAREDSECTION_H

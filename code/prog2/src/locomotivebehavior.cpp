@@ -40,7 +40,7 @@ void LocomotiveBehavior::run()
                 // Logic for moving in reverse direction
                 attendre_contact(3);
                 sharedSection->request(loco, loco.priority);
-                attendre_contact(11);
+                attendre_contact(10);
                 sharedSection->access(loco, loco.priority);
 
                 attendre_contact(20);
