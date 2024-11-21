@@ -4,6 +4,8 @@
 // /_/   \___/\____/ /____/\___/____//_/   //
 //
 
+/* Editors : Léon Surbeck, Alex Berberat */
+
 #include "locomotivebehavior.h"
 #include "ctrain_handler.h"
 #include "sharedstation.h"
@@ -15,19 +17,14 @@ void LocomotiveBehavior::run()
     loco.demarrer();
     loco.afficherMessage("Ready!");
 
-    int nbToursLoco7 = 0, nbToursLoco42 = 0; // Track number of completed loops
-    bool directionAvant = true; // Track direction (true = forward, false = backward)
-    const int N1 = 1; // Define N1 loops before reversing direction (customize for each locomotive)
-    const int N2 = 1;
-
-    /* A vous de jouer ! */
-
-    // Vous pouvez appeler les méthodes de la section partagée comme ceci :
+    int nbToursLoco7 = 0, nbToursLoco42 = 0;
+    bool directionAvant = true;
+    constexpr int nbToursAFaire42 = 1, nbToursAFaire7 = 1;
 
     while(!PcoThread::thisThread()->stopRequested()) {
         if (loco.numero() == 42) {
             if (directionAvant) {
-                // Logic for moving forward
+                // Logique pour aller en avant
                 attendre_contact(29);
                 sharedSection->request(loco, loco.priority);
                 attendre_contact(22);
@@ -37,7 +34,7 @@ void LocomotiveBehavior::run()
                 sharedSection->leave(loco);
 
             } else {
-                // Logic for moving in reverse direction
+                // Logique pour aller en arrière
                 attendre_contact(3);
                 sharedSection->request(loco, loco.priority);
                 attendre_contact(10);
@@ -47,20 +44,22 @@ void LocomotiveBehavior::run()
                 sharedSection->leave(loco);
             }
 
-            // Increment loop counter and check if we need to reverse direction
             attendre_contact(1);
             nbToursLoco42++;
             loco.afficherMessage("Loco 42: J'ai fait : " + QString::number(nbToursLoco42) + " tours");
-            if (nbToursLoco42 >= N1) {
-                directionAvant = !directionAvant; // Toggle the direction flag
-                nbToursLoco42 = 0; // Reset the loop counter
-                sharedStation.waitingAtStation(loco);
-                sharedSection->togglePriorityMode();
+
+            //Si le nombre de tours est atteint, on attend en gare
+            if (nbToursLoco42 >= nbToursAFaire42) {
+                nbToursLoco42 = 0; // On remet à zéro le compteur
+                sharedStation.waitingAtStation(loco); // On attend en gare
+                setRandomPriority(); // On redéfinit une priorité aléatoire
+                directionAvant = !directionAvant; // Inversion du flag de direction
+                sharedSection->togglePriorityMode(); // Inversion de la priorité après l'attente en gare
             }
         }
         else if (loco.numero() == 7) {
             if (directionAvant) {
-                // Logic for moving forward
+                // Logique pour aller en avant
                 attendre_contact(33);
                 sharedSection->request(loco,loco.priority);
 
@@ -75,7 +74,7 @@ void LocomotiveBehavior::run()
                 sharedSection->leave(loco);
 
             } else {
-                // Logic for moving in reverse direction
+                // Logique pour aller en arrière
                 attendre_contact(6);
                 sharedSection->request(loco, loco.priority);
                 attendre_contact(14);
@@ -91,10 +90,13 @@ void LocomotiveBehavior::run()
             attendre_contact(5);
             nbToursLoco7++;
             loco.afficherMessage("Loco 7: J'ai fait : " + QString::number(nbToursLoco7) + " tours");
-            if (nbToursLoco7 >= N2) {
-                directionAvant = !directionAvant; // Toggle the direction flag
-                nbToursLoco7 = 0; // Reset the loop counter
-                sharedStation.waitingAtStation(loco);
+
+            //Si le nombre de tours est atteint, on attend en gare
+            if (nbToursLoco7 >= nbToursAFaire7) {
+                nbToursLoco7 = 0; // Remise à zéro du compteur
+                sharedStation.waitingAtStation(loco); // On attend en gare
+                directionAvant = !directionAvant; // Inversion du flag de direction
+                setRandomPriority(); // On redéfinit une priorité aléatoire
             }
         }
     }

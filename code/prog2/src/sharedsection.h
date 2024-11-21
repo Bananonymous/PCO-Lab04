@@ -1,3 +1,5 @@
+/* Editors : Léon Surbeck, Alex Berberat */
+
 #ifndef SHAREDSECTION_H
 #define SHAREDSECTION_H
 
@@ -17,7 +19,7 @@ class SharedSection final : public SharedSectionInterface {
 public:
     /**
      * @brief SharedSection Constructeur de la classe qui représente la section partagée.
-     * Initialisez vos éventuels attributs ici, sémaphores etc.
+     * Initialisation des attributs.
      */
     SharedSection() : section_mutex(1), section_waiting_locos(0) {
         isUsed = false;
@@ -62,8 +64,8 @@ public:
         } else {
             loco.afficherMessage("Attente, section occupée");
             loco.arreter();
-            section_mutex.release(); // Release mutex before blocking
-            section_waiting_locos.acquire(); // Attendre l'accès
+            section_mutex.release();
+            section_waiting_locos.acquire();
             section_mutex.acquire();
             waitingLocos.erase(
                 std::remove(waitingLocos.begin(), waitingLocos.end(), &loco),
@@ -86,7 +88,7 @@ public:
         loco.afficherMessage("Tronçon libéré par loco " + QString::number(loco.numero()));
 
         if (!waitingLocos.empty()) {
-            section_waiting_locos.release(); // Libérer l'accès seulement si des locomotives attendent
+            section_waiting_locos.release(); // Libérer l'accès seulement si des locomotives attendent pour éviter les multiples libérations
         }
 
         section_mutex.release();
@@ -104,7 +106,7 @@ private:
 
         Locomotive *selectedLoco = nullptr;
 
-        for (auto loco : waitingLocos) {
+        for (const auto loco : waitingLocos) {
             if (selectedLoco == nullptr) {
                 selectedLoco = loco;
             } else {
@@ -127,8 +129,6 @@ private:
         return selectedLoco;
     }
 
-
-    // Attributes privés ...
     bool isUsed = false;
     PcoSemaphore section_waiting_locos;
     PcoSemaphore section_mutex;

@@ -4,6 +4,8 @@
 // /_/   \___/\____/ /____/\___/____//_/   //
 //                                         //
 
+/* Editors : Léon Surbeck, Alex Berberat */
+
 #ifndef LOCOMOTIVEBEHAVIOR_H
 #define LOCOMOTIVEBEHAVIOR_H
 
@@ -22,15 +24,20 @@ public:
      * \brief locomotiveBehavior Constructeur de la classe
      * \param loco la locomotive dont on représente le comportement
      */
-    LocomotiveBehavior(Locomotive& loco, std::shared_ptr<SharedSectionInterface> sharedSection, std::shared_ptr<SharedStation> sharedStation/*, autres paramètres éventuels */):
+    LocomotiveBehavior(Locomotive& loco, std::shared_ptr<SharedSectionInterface> sharedSection, std::shared_ptr<SharedStation> sharedStation):
     loco(loco),sharedSection(sharedSection), sharedStation(*sharedStation){
         // Eventuel code supplémentaire du constructeur
         setRandomPriority();
     }
 
-    // Génération aléatoire d'une nouvelle priorité entre 0 et 10
+    // Génération aléatoire d'une nouvelle priorité entre 0 et 10 (utilisation de rand() pendant les tests pour pouvoir reproduire les résultats)
     void setRandomPriority() {
-        this->loco.priority = rand() % 11; // Génère un nombre entre 0 et 10
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> dis(0, 10);
+        this->loco.priority = dis(gen);
+
+        // this->loco.priority = rand() % 11;
     }
 
 protected:
@@ -59,15 +66,11 @@ protected:
      */
     std::shared_ptr<SharedSectionInterface> sharedSection;
 
-    /*
-     * Vous êtes libres d'ajouter des méthodes ou attributs
-     *
-     * Par exemple la priorité ou le parcours
+    /**
+     * @brief sharedStation référence la station "partagée"
      */
-
-private:
-
     SharedStation& sharedStation;
+
 
 };
 

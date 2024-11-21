@@ -1,3 +1,6 @@
+
+/* Editors : Léon Surbeck, Alex Berberat */
+
 #ifndef SHARED_STATION_H
 #define SHARED_STATION_H
 
@@ -12,7 +15,6 @@ public:
     void waitingAtStation(Locomotive& loco);
 
 private:
-    /* TODO */
     int waitingLocos, totLocos;
     PcoSemaphore waiting_at_station_semaphore;
     PcoSemaphore goingToStation;

@@ -4,6 +4,7 @@
 // /_/   \___/\____/ /____/\___/____//_/   //
 //                                         //
 
+/* Editors : Léon Surbeck, Alex Berberat */
 
 #include "ctrain_handler.h"
 
@@ -105,7 +106,7 @@ int cmain()
     // Création de la section partagée
     std::shared_ptr<SharedSectionInterface> sharedSection = std::make_shared<SharedSection>();
 
-    //Création de la station partagée
+    //Création de la station "partagée"
     std::shared_ptr<SharedStation> sharedStation = std::make_shared<SharedStation>(2);
 
     // Création du thread pour la loco 0
