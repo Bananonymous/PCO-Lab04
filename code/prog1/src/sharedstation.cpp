@@ -4,6 +4,8 @@
 // /_/   \___/\____/ /____/\___/____//_/   //
 //
 
+/* Editors : Léon Surbeck, Alex Berberat */
+
 #include <chrono>
 #include <thread>
 

@@ -1,3 +1,5 @@
+/* Editors : Léon Surbeck, Alex Berberat */
+
 #ifndef SHARED_STATION_H
 #define SHARED_STATION_H
 

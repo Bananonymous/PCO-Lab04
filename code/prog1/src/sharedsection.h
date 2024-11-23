@@ -4,6 +4,8 @@
 // /_/   \___/\____/ /____/\___/____//_/   //
 //
 
+/* Editors : Léon Surbeck, Alex Berberat */
+
 #ifndef SHAREDSECTION_H
 #define SHAREDSECTION_H
 

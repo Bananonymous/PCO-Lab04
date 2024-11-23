@@ -4,6 +4,8 @@
 // /_/   \___/\____/ /____/\___/____//_/   //
 //
 
+/* Editors : Léon Surbeck, Alex Berberat */
+
 #include "locomotivebehavior.h"
 #include "ctrain_handler.h"
 #include "sharedstation.h"

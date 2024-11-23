@@ -1,4 +1,0 @@
-/usr/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "Unix Makefiles" -S /home/leon/pco/pco24_lab04/code/prog2 -B /home/leon/pco/pco24_lab04/code/prog2
--- Configuring done (0.1s)
--- Generating done (0.0s)
--- Build files have been written to: /home/leon/pco/pco24_lab04/code/prog2

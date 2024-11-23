@@ -4,6 +4,8 @@
 // /_/   \___/\____/ /____/\___/____//_/   //
 //
 
+/* Editors : Léon Surbeck, Alex Berberat */
+
 #include "ctrain_handler.h"
 
 #include "locomotive.h"
@@ -16,7 +18,7 @@
 // Vous pouvez changer les vitesses initiales, ou utiliser la fonction loco.fixerVitesse(vitesse);
 // Laissez les numéros des locos à 0 et 1 pour ce laboratoire
 // Locomotive A
-static Locomotive locoA(7 /* Numéro (pour commande trains sur maquette réelle) */, 35 /* Vitesse */);
+static Locomotive locoA(7 /* Numéro (pour commande trains sur maquette réelle) */, 10 /* Vitesse */);
 // Locomotive B
 static Locomotive locoB(42 /* Numéro (pour commande trains sur maquette réelle) */, 15 /* Vitesse */);
 
