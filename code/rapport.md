@@ -1,36 +1,62 @@
-# Laboratoire 04 : Gestion de ressources partagées
+# Rapport du Laboratoire 04 : Gestion de Ressources Partagées
 
-- Auteurs : Berberat Alex, Surbeck Léon
+### Auteurs : Léon Surbeck, Alex Berberat
 
+---
 
-## Introduction au problème
-Le but de ce laboratoire est de simuler la gestion de deux locomotives qui doivent passer sur un tronçon commun pour apprendre la gestion de ressources partagées.  
-La première partie du laboratoire nous apprends à gérer les sections critique.  
-La deuxième partie elle nous apprends à mettre des priorités sur des process qui ont besoin de ressources partagées.
+## Introduction
 
+Le laboratoire 04 vise à explorer la gestion de ressources partagées et la résolution de compétitions entre processus, à l'aide de sémaphores. Pour ce faire, nous avons utilisé la simulation de maquette permettant la gestion de deux locomotives partageant un tronçon commun, avec des comportements distincts pour deux programmes :
+
+1. **Programme 1** : Gestion de section critique avec inversion de direction périodique.
+2. **Programme 2** : Ajout d'une gestion de priorité pour les accès au tronçon partagé.
+
+---
 
 ## Choix d'implémentation
 
-> [!WARNING] A enlever quand rapport fini  
-> Dans cette section, vous **décrivez** vos choix et votre logique pour résoudre le problème posé. Ce que nous attendons de vous, c'est une explication claire et concise. Nous ne voulons pas que vous copiez votre code dans le rapport en disant : "Voilà ce que j'ai fait." Aucun code ne doit apparaître dans ce rapport. Expliquez simplement vos choix, les raisonnements que vous avez suivis, etc.
-
 ### Programme 1
-- `emergency_stop()`  
-    Nous avons décidé de fixer la vitesse à 0 afin d'assurer que les locomotives ne puissent pas repartir.  
- 
+
+- **Gestion du tronçon partagé** : 
+  - Nous avons implémenté une classe `SharedSection` dérivée de l'interface `SharedSectionInterface`. Elle contrôle l'accès au tronçon critique à l'aide de sémaphores.
+  - Une locomotive effectue une requête pour accéder au tronçon. Si celui-ci est occupé, elle s'arrête avant d'y entrer. Sinon, elle le traverse directement sans interruption.
+
+- **Inversion de direction** : 
+  - Chaque locomotive alterne sa direction après avoir complété un nombre fixe de tours, défini individuellement.
+  - Une coordination est mise en place pour que les locomotives attendent à leur gare respective avant de repartir.
+
+- **Arrêt d'urgence** : 
+  - La méthode `emergency_stop()` force un arrêt immédiat en définissant la vitesse de toutes les locomotives à zéro, sans désactiver la maquette entière.
 
 ### Programme 2
-Une grande parti du code a été copié collé depuis programme 1 comme indiqué par la consigne.  
-Nous avons tout de même fait certaines adaptations.
 
+- **Extension avec gestion de priorité** :
+  - Nous avons introduit deux nouvelles fonctions, `request()` et `togglePriorityMode()`, pour gérer dynamiquement les priorités des locomotives.
+  - Une locomotive formule une requête (contact 1) et obtient une réponse (contact 2) avant de traverser le tronçon partagé.
+  - Les priorités sont inversées à chaque attente en gare, conformément aux exigences.
 
+- **Arbitrage basé sur les priorités** :
+  - La locomotive avec la priorité la plus élevée accède au tronçon en premier.
+  - En cas de priorités égales, la première locomotive arrivée est servie.
+
+---
 
 ## Tests effectués
 
-> [!WARNING] A enlever quand rapport fini  
-> Les tests sont importants, ne les négligez pas. Le but d'un test n'est pas simplement de valider votre code dans un cas simple et de s'arrêter là. Il ne s'agit pas non plus de faire tourner votre programme de plus en plus longtemps. Réfléchissez aux moments potentiellement critiques de l'exécution du programme et cherchez à le faire planter ! C'est également ce que nous ferons lors de la correction. :)
+1. **Validation des comportements** :
+   - Vérification du respect des règles d'inversion de direction et des attentes en gare.
+   - Simulation de vitesses variables pour tester les scénarios critiques, notamment les inerties trop élevées empêchant l'arrêt avant le tronçon partagé.
 
+2. **Tests de robustesse** :
+   - Introduction de conflits dans l'accès au tronçon partagé pour valider l'utilisation des sémaphores.
+   - Simulation de défaillances comme des arrêts d'urgence successifs pour garantir une réponse fiable.
 
-Nous avons testé les locomotives avec différente vitesse afin de vérifier le bon fonctionnement. Nous avons constaté qu'avec une vitesse trop élevée l'inertie de la locomotive rendait son arrêt avant la section critique impossible.  
+3. **Gestion des priorités (Programme 2)** :
+   - Modification dynamique des priorités pour observer les changements de comportement des locomotives.
+   - Validation que les locomotives respectent bien les nouvelles priorités après chaque attente en gare.
 
-Nous avons aussi testé en changeant le point de départ des locomotives pour nous assurer que cela ne causait pas de problèmes.
+---
+
+## Conclusion
+
+Les deux programmes répondent aux objectifs fixés. Le Programme 1 établit une gestion de base des ressources partagées, tandis que le Programme 2 étend ces fonctionnalités avec un système de priorités dynamique. Les tests effectués garantissent une robustesse et un fonctionnement conforme aux attentes.
