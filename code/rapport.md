@@ -11,7 +11,7 @@ La deuxième partie elle nous apprends à mettre des priorités sur des process 
 
 ## Choix d'implémentation
 
-> [!Warning] A enlever quand rapport fini  
+> [!WARNING] A enlever quand rapport fini  
 > Dans cette section, vous **décrivez** vos choix et votre logique pour résoudre le problème posé. Ce que nous attendons de vous, c'est une explication claire et concise. Nous ne voulons pas que vous copiez votre code dans le rapport en disant : "Voilà ce que j'ai fait." Aucun code ne doit apparaître dans ce rapport. Expliquez simplement vos choix, les raisonnements que vous avez suivis, etc.
 
 ### Programme 1
@@ -27,7 +27,7 @@ Nous avons tout de même fait certaines adaptations.
 
 ## Tests effectués
 
-> [!Warning] A enlever quand rapport fini  
+> [!WARNING] A enlever quand rapport fini  
 > Les tests sont importants, ne les négligez pas. Le but d'un test n'est pas simplement de valider votre code dans un cas simple et de s'arrêter là. Il ne s'agit pas non plus de faire tourner votre programme de plus en plus longtemps. Réfléchissez aux moments potentiellement critiques de l'exécution du programme et cherchez à le faire planter ! C'est également ce que nous ferons lors de la correction. :)
 
 
